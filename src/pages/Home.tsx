@@ -1,15 +1,21 @@
 import '../styles/auth.scss';
+
+import { FormEvent, useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import { useHistory } from 'react-router-dom';
 import { Button } from '../components/Button';
 
 import illustrationImg from '../assets/images/illustration.svg';
 import logoImg from '../assets/images/logo.svg';
 import googleIconImg from '../assets/images/google-icon.svg';
-import { useAuth } from '../hooks/useAuth';
+import { verifyStringIsEmpty } from '../utils/validators';
+import { database } from '../services/firebase';
+
 
 export const Home = () => {
 	const history = useHistory();
 	const { user, signInWithGoogle } = useAuth();
+	const [roomCode, setRoomCode] = useState('');
 
 	const goToNewRooms = () => history.push('/rooms/new')
 
@@ -18,12 +24,26 @@ export const Home = () => {
 			try {
 				await signInWithGoogle();
 				goToNewRooms()
-			} catch(e) {
-				console.log('Erro: ', e);
-			}
+			} catch (e) {}
 		} else {
 			goToNewRooms()
 		}
+	}
+
+	const handleJoinRoom = async (event: FormEvent) => {
+		event.preventDefault();
+		if (verifyStringIsEmpty(roomCode)) {
+			return;
+		}
+
+		const roomRef = await database.ref(`rooms/${roomCode}`).get();
+
+		if (!roomRef.exists()) {
+			alert('Room does not exists');
+			return;
+		}
+
+		history.push(`/rooms/${roomCode}`);
 	}
 
 	return (
@@ -44,10 +64,11 @@ export const Home = () => {
 
 					<div className="separator">ou entre em uma sala</div>
 
-					<form>
+					<form onSubmit={handleJoinRoom}>
 						<input
 							type="text"
 							placeholder="Digite o código da sala"
+							onChange={event => setRoomCode(event.target.value)}
 						/>
 						<Button type="submit">
 							Entrar na sala
