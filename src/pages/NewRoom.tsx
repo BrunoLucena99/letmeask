@@ -5,13 +5,8 @@ import illustrationImg from '../assets/images/illustration.svg';
 import logoImg from '../assets/images/logo.svg';
 
 import { Button } from '../components/Button';
-import { AuthContext } from '../contexts/AuthContext';
-import { useContext } from 'react';
 
 export const NewRoom = () => {
-
-	const { user } = useContext(AuthContext);
-
 	return (
 		<div id="page-auth">
 			<aside>
