@@ -8,65 +8,20 @@ import { FormEvent } from 'react';
 import { verifyStringIsEmpty } from '../utils/validators';
 import { useAuth } from '../hooks/useAuth';
 import { database } from '../services/firebase';
-import { useEffect } from 'react';
 import { Question } from '../components/Question';
+import { useRoom } from '../hooks/useRoom';
 
 interface RoomRouteParams {
 	id: string;
 }
 
-interface QuestionType {
-	id: string;
-	author: {
-		name: string,
-		avatar: string,
-	},
-	content: string,
-	isAnswered: boolean,
-	isHighlighted: boolean,
-}
-
-type FirebaseQuestions = Record<string, {
-	author: {
-		name: string,
-		avatar: string,
-	},
-	content: string,
-	isAnswered: boolean,
-	isHighlighted: boolean,
-}> 
-
 export const Room = () => {
 	const [newQuestion, setNewQuestion] = useState('');
-	const [questions, setQuestions] = useState<QuestionType[]>([]);
-	const [title, setTitle] = useState('');
-
-	const { user } = useAuth();
 	const params = useParams<RoomRouteParams>();
 	const roomId = params.id;
 
-	useEffect(() => {
-		const roomRef = database.ref(`rooms/${roomId}`);
-		/*
-			Read firebase realtime database docs to increase performance of this event.
-			Use childAdded/removed event instead of all values 
-		*/
-
-		roomRef.on('value', room => {
-			const databaseRoom = room.val();
-			const firebaseQuestions: FirebaseQuestions = databaseRoom.questions ?? {};
-			const parsedQuestions = Object.entries(firebaseQuestions).map(([key, val]) => ({
-				id: key,
-				content: val.content,
-				author: val.author,
-				isAnswered: val.isAnswered,
-				isHighlighted: val.isHighlighted
-			}))
-
-			setTitle(databaseRoom.title);
-			setQuestions(parsedQuestions);
-		})
-	}, [roomId]);
+	const { user } = useAuth();
+	const { questions, title } = useRoom(roomId);
 
 	const handleSendQuestion = async (event: FormEvent) => {
 		event.preventDefault();
@@ -148,7 +103,6 @@ export const Room = () => {
 					))}
 				</div>
 			</main>
-
 		</div>
 	)
 }
