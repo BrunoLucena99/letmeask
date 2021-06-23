@@ -9,12 +9,13 @@ import { verifyStringIsEmpty } from '../utils/validators';
 import { useAuth } from '../hooks/useAuth';
 import { database } from '../services/firebase';
 import { useEffect } from 'react';
+import { Question } from '../components/Question';
 
 interface RoomRouteParams {
 	id: string;
 }
 
-interface Question {
+interface QuestionType {
 	id: string;
 	author: {
 		name: string,
@@ -37,7 +38,7 @@ type FirebaseQuestions = Record<string, {
 
 export const Room = () => {
 	const [newQuestion, setNewQuestion] = useState('');
-	const [questions, setQuestions] = useState<Question[]>([]);
+	const [questions, setQuestions] = useState<QuestionType[]>([]);
 	const [title, setTitle] = useState('');
 
 	const { user } = useAuth();
@@ -137,7 +138,15 @@ export const Room = () => {
 						</Button>
 					</div>
 				</form>
-					{JSON.stringify(questions)}
+				<div className="question-list">
+					{questions.map((question) => (
+						<Question
+							key={question.id}
+							author={question.author}
+							content={question.content}
+						/>
+					))}
+				</div>
 			</main>
 
 		</div>
